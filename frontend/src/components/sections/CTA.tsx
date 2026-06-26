@@ -76,7 +76,7 @@ export default function CTA() {
     // Simulate cyber-scan processing lag for premium feel
     setTimeout(async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/blueprint/generate', {
+        const response = await fetch('https://fitforge-production-0c79.up.railway.app/api/blueprint/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
