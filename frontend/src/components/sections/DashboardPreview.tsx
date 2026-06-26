@@ -12,17 +12,33 @@ interface DashboardPreviewProps {
 export default function DashboardPreview({ weeklyReview, measurements }: DashboardPreviewProps) {
   const [chartTab, setChartTab] = useState<'strength' | 'weight'>('weight');
 
+  const activeWeeklyReview = weeklyReview || {
+    workoutConsistencyScore: 92,
+    nutritionConsistencyScore: 88,
+  };
+
+  const activeMeasurements = measurements && measurements.length > 1 ? measurements : [
+    { weight: 84.0, date: 'Week 1' },
+    { weight: 83.2, date: 'Week 2' },
+    { weight: 82.5, date: 'Week 3' },
+    { weight: 81.9, date: 'Week 4' },
+    { weight: 81.1, date: 'Week 5' },
+    { weight: 80.4, date: 'Week 6' },
+    { weight: 79.8, date: 'Week 7' },
+    { weight: 79.2, date: 'Week 8' },
+  ];
+
   // Hardcode conceptual standard strength growth path, but make weight logs strictly dynamic!
   const strengthPoints = "0,110 50,105 100,90 150,85 200,60 250,55 300,30 350,25";
   
   let weightPoints = "";
   let weightPointsArray: number[] = [];
   
-  const hasLogs = measurements && measurements.length > 1;
+  const hasLogs = activeMeasurements && activeMeasurements.length > 1;
 
   if (hasLogs) {
     // Map actual user weight logs to SVG plot points (0 to 350 on X, 20 to 130 on Y)
-    const recentLogs = [...measurements].reverse().slice(-8); // take last 8 logs
+    const recentLogs = [...activeMeasurements].reverse().slice(-8); // take last 8 logs
     const minW = Math.min(...recentLogs.map(m => m.weight));
     const maxW = Math.max(...recentLogs.map(m => m.weight));
     const wRange = maxW - minW || 1;
@@ -38,8 +54,8 @@ export default function DashboardPreview({ weeklyReview, measurements }: Dashboa
   }
 
   // Active workout consistency from weekly review DB
-  const completionRate = weeklyReview ? weeklyReview.workoutConsistencyScore : null;
-  const nutritionRate = weeklyReview ? weeklyReview.nutritionConsistencyScore : null;
+  const completionRate = activeWeeklyReview ? activeWeeklyReview.workoutConsistencyScore : null;
+  const nutritionRate = activeWeeklyReview ? activeWeeklyReview.nutritionConsistencyScore : null;
 
   return (
     <section className="relative w-full h-screen snap-start snap-always py-24 px-6 sm:px-12 md:px-24 flex items-center justify-center overflow-hidden z-20 shrink-0 select-none">
@@ -61,7 +77,7 @@ export default function DashboardPreview({ weeklyReview, measurements }: Dashboa
             </p>
           </div>
           
-          {weeklyReview && hasLogs && (
+          {activeWeeklyReview && hasLogs && (
             <div className="flex gap-2 bg-white/5 p-1.5 rounded-lg border border-white/5 font-mono text-[9px]">
               <button
                 onClick={() => setChartTab('strength')}
@@ -83,7 +99,7 @@ export default function DashboardPreview({ weeklyReview, measurements }: Dashboa
           )}
         </div>
 
-        {weeklyReview && hasLogs ? (
+        {activeWeeklyReview && hasLogs ? (
           /* Live Terminal Dashboard preview */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             

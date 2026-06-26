@@ -23,24 +23,33 @@ export default function DigitalTwin({ profile }: DigitalTwinProps) {
   const [activePhase, setActivePhase] = useState<number>(0);
   const [phases, setPhases] = useState<PredictionPhase[]>([]);
 
+  const activeProfile = profile || {
+    age: 26,
+    gender: 'male',
+    height: 182,
+    weight: 84,
+    activityLevel: 'moderate',
+    goal: 'lose_fat',
+  };
+
   useEffect(() => {
-    if (profile) {
+    if (activeProfile) {
       // Calculate realistic projections dynamically from their real biometrics!
-      const heightM = profile.height / 100;
-      const initialBmi = profile.weight / (heightM * heightM);
-      const isMale = profile.gender === 'male';
+      const heightM = activeProfile.height / 100;
+      const initialBmi = activeProfile.weight / (heightM * heightM);
+      const isMale = activeProfile.gender === 'male';
       
       const bmrVal = isMale 
-        ? Math.round(10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5)
-        : Math.round(10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161);
+        ? Math.round(10 * activeProfile.weight + 6.25 * activeProfile.height - 5 * activeProfile.age + 5)
+        : Math.round(10 * activeProfile.weight + 6.25 * activeProfile.height - 5 * activeProfile.age - 161);
 
       let initialFat = isMale 
-        ? (1.20 * initialBmi + 0.23 * profile.age - 16.2)
-        : (1.20 * initialBmi + 0.23 * profile.age - 5.4);
+        ? (1.20 * initialBmi + 0.23 * activeProfile.age - 16.2)
+        : (1.20 * initialBmi + 0.23 * activeProfile.age - 5.4);
       initialFat = Math.max(4, initialFat);
 
       const computedPhases: PredictionPhase[] = [];
-      let currentWeight = profile.weight;
+      let currentWeight = activeProfile.weight;
       let currentFat = initialFat;
 
       const milestones = [
@@ -52,10 +61,10 @@ export default function DigitalTwin({ profile }: DigitalTwinProps) {
 
       milestones.forEach((m, idx) => {
         if (idx > 0) {
-          if (profile.goal === 'lose_fat') {
+          if (activeProfile.goal === 'lose_fat') {
             currentWeight -= 1.8;
             currentFat -= 1.0;
-          } else if (profile.goal === 'build_muscle') {
+          } else if (activeProfile.goal === 'build_muscle') {
             currentWeight += 1.0;
             currentFat += 0.2;
           } else {
@@ -133,7 +142,7 @@ export default function DigitalTwin({ profile }: DigitalTwinProps) {
           </p>
         </div>
 
-        {profile && phases.length > 0 ? (
+        {phases.length > 0 ? (
           /* Live Calibrated Dashboard */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             

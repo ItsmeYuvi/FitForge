@@ -82,14 +82,20 @@ function TiltCard({ card }: { card: MacroCard }) {
 }
 
 export default function NutritionEngine({ nutrition }: NutritionEngineProps) {
+  const activeNutrition = nutrition || {
+    calories: 2450,
+    protein: 180,
+    carbs: 260,
+    fats: 75,
+  };
+
   // Grab live values or pending signals
   const getValue = (id: string) => {
-    if (!nutrition) return 'PENDING';
     switch (id) {
-      case 'calories': return nutrition.calories.toLocaleString();
-      case 'protein': return nutrition.protein.toString();
-      case 'carbs': return nutrition.carbs.toString();
-      case 'fats': return nutrition.fats.toString();
+      case 'calories': return activeNutrition.calories.toLocaleString();
+      case 'protein': return activeNutrition.protein.toString();
+      case 'carbs': return activeNutrition.carbs.toString();
+      case 'fats': return activeNutrition.fats.toString();
       default: return '---';
     }
   };

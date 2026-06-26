@@ -19,35 +19,42 @@ interface BodyScanProps {
 }
 
 export default function BodyScan({ onHoverMetric, profile }: BodyScanProps) {
+  const activeProfile = profile || {
+    age: 26,
+    gender: 'male',
+    height: 182,
+    weight: 84,
+    activityLevel: 'moderate',
+    goal: 'lose_fat',
+  };
+
   // Helper to calculate biometrics on the fly from database profile
   const getMetricValue = (id: string) => {
-    if (!profile) return 'PENDING';
-
-    const hM = profile.height / 100;
-    const bmiVal = profile.weight / (hM * hM);
-    const isMale = profile.gender === 'male';
+    const hM = activeProfile.height / 100;
+    const bmiVal = activeProfile.weight / (hM * hM);
+    const isMale = activeProfile.gender === 'male';
     const bmrVal = isMale 
-      ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
-      : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
+      ? 10 * activeProfile.weight + 6.25 * activeProfile.height - 5 * activeProfile.age + 5
+      : 10 * activeProfile.weight + 6.25 * activeProfile.height - 5 * activeProfile.age - 161;
 
     switch (id) {
       case 'height':
-        return profile.height.toString();
+        return activeProfile.height.toString();
       case 'weight':
-        return profile.weight.toString();
+        return activeProfile.weight.toString();
       case 'bmi':
         return bmiVal.toFixed(1);
       case 'bodyFat': {
         const estFat = isMale 
-          ? 1.20 * bmiVal + 0.23 * profile.age - 16.2 
-          : 1.20 * bmiVal + 0.23 * profile.age - 5.4;
+          ? 1.20 * bmiVal + 0.23 * activeProfile.age - 16.2 
+          : 1.20 * bmiVal + 0.23 * activeProfile.age - 5.4;
         return Math.max(3, estFat).toFixed(1);
       }
       case 'bmr':
         return Math.round(bmrVal).toLocaleString();
       case 'tdee': {
         const multipliers: Record<string, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
-        const tdeeVal = bmrVal * (multipliers[profile.activityLevel] || 1.2);
+        const tdeeVal = bmrVal * (multipliers[activeProfile.activityLevel] || 1.2);
         return Math.round(tdeeVal).toLocaleString();
       }
       default:
@@ -129,14 +136,9 @@ export default function BodyScan({ onHoverMetric, profile }: BodyScanProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="glass-panel p-4 rounded-lg border border-white/5">
               <span className="text-[9px] font-mono text-gray-500 uppercase block mb-1">SCAN CALIBRATION</span>
-              {profile ? (
-                <span className="text-sm font-mono font-bold text-neon-green">ACTIVE SYNAPSE</span>
-              ) : (
-                <div className="flex items-center gap-1.5 font-mono text-xs text-gray-500 animate-pulse">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>AWAITING SIGNAL</span>
-                </div>
-              )}
+              <span className="text-sm font-mono font-bold text-neon-green">
+                {profile ? 'ACTIVE SYNAPSE' : 'DEMO MODE'}
+              </span>
             </div>
             <div className="glass-panel p-4 rounded-lg border border-white/5">
               <span className="text-[9px] font-mono text-gray-500 uppercase block mb-1">CALIBRATION SPEED</span>
