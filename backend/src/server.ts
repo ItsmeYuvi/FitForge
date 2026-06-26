@@ -64,6 +64,6 @@ if (mongoUri) {
 }
 
 // Start Server
-app.listen(Number(PORT), '0.0.0.0', () => {
+app.listen(PORT, () => {
   console.log(`🚀 [FitForge Core] Running on port ${PORT}`);
 });
