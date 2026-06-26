@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Sparkles, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
 
 interface HeroProps {
   onGenerateClick: () => void;
@@ -97,21 +98,21 @@ export default function Hero({ onGenerateClick }: HeroProps) {
             variants={itemVars}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6"
           >
+            <Link
+              href="/sign-up"
+              data-cursor-text="START"
+              className="relative px-8 py-4 bg-gradient-to-r from-cyber-blue to-neon-green text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:shadow-neon-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 pointer-events-auto"
+            >
+              Get Started
+            </Link>
+
             <button
               onClick={onGenerateClick}
               data-cursor-text="EVOLVE"
-              className="relative px-8 py-4 bg-gradient-to-r from-cyber-blue to-neon-green text-black font-semibold text-xs tracking-widest uppercase rounded-lg shadow-lg hover:shadow-neon-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 pointer-events-auto"
-            >
-              Generate My Fitness Blueprint
-            </button>
-
-            <a
-              href="#dashboard-preview"
-              data-cursor-text="WATCH"
               className="px-8 py-4 border border-white/10 glass-panel hover:bg-white/5 hover:border-white/20 text-white font-semibold text-xs tracking-widest uppercase rounded-lg transition-all duration-300 pointer-events-auto"
             >
-              Watch Demo
-            </a>
+              Free Scanner Preview
+            </button>
           </motion.div>
         </motion.div>
       </div>

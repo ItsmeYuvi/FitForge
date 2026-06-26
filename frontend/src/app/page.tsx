@@ -133,13 +133,22 @@ export default function Home() {
             DASHBOARD PANEL
           </Link>
         ) : (
-          <button
-            onClick={scrollToBlueprint}
-            data-cursor-text="LAUNCH"
-            className="px-4 py-2 border border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-black rounded font-mono text-[9px] tracking-widest uppercase transition-all duration-300 pointer-events-auto"
-          >
-            METAMORPHOSIS
-          </button>
+          <div className="flex gap-4 items-center">
+            <Link
+              href="/sign-in"
+              data-cursor-text="LOGIN"
+              className="px-4 py-2 text-gray-400 hover:text-white rounded font-mono text-[9px] tracking-widest uppercase transition-all duration-300 pointer-events-auto"
+            >
+              LOG IN
+            </Link>
+            <Link
+              href="/sign-up"
+              data-cursor-text="START"
+              className="px-4 py-2 border border-cyber-blue/30 text-cyber-blue hover:bg-cyber-blue hover:text-black rounded font-mono text-[9px] tracking-widest uppercase transition-all duration-300 pointer-events-auto"
+            >
+              GET STARTED
+            </Link>
+          </div>
         )}
       </header>
 
