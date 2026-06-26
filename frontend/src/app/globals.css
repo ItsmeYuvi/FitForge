@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cyber-blue: #00f0ff;
+  --color-cyber-blue-glow: rgba(0, 240, 255, 0.15);
+  --color-neon-green: #39ff14;
+  --color-neon-green-glow: rgba(57, 255, 20, 0.15);
+  --color-dark-bg: #030303;
+  --color-dark-surface: #0a0a0c;
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-bg: rgba(10, 10, 12, 0.7);
+  --font-display: var(--font-outfit), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+}
+
+:root {
+  --background: #030303;
+  --foreground: #f3f4f6;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #030303;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.5);
+}
+
+/* Glassmorphism Presets */
+.glass-panel {
+  background: rgba(10, 10, 12, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-panel-glow-blue {
+  background: rgba(10, 10, 12, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.05);
+}
+
+.glass-panel-glow-green {
+  background: rgba(10, 10, 12, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  box-shadow: 0 0 30px rgba(57, 255, 20, 0.05);
+}
+
+/* Futuristic Cyber Grid Background */
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center;
+}
+
+/* Radial Glows */
+.radial-glow-blue {
+  background: radial-gradient(circle 600px at var(--x, 50%) var(--y, 50%), rgba(0, 240, 255, 0.08), transparent 80%);
+}
+
+.radial-glow-green {
+  background: radial-gradient(circle 600px at var(--x, 50%) var(--y, 50%), rgba(57, 255, 20, 0.08), transparent 80%);
+}
+
+/* Scanner Line Animation */
+@keyframes scan {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.scanner-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00f0ff, #39ff14, #00f0ff, transparent);
+  position: absolute;
+  left: 0;
+  right: 0;
+  animation: scan 6s infinite linear;
+  box-shadow: 0 0 15px #00f0ff, 0 0 30px #39ff14;
+}
+
+/* Hide Default Cursor on desktop when custom cursor is active */
+@media (min-width: 1024px) {
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
+}

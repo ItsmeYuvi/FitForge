@@ -1,0 +1,12 @@
+# Dependency directories
+node_modules/
+
+# Production build output
+dist/
+
+# Local environment secret variables (critical)
+.env
+.env.production
+
+# TypeScript compiler log
+tsbuildinfo
