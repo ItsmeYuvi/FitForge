@@ -364,7 +364,7 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
         const y = -0.15 + idx * 0.22; // pelvis to neck
         const scale = 1.0 - Math.abs(idx - 3) * 0.12;
         return (
-          <mesh key={`spine-${idx}`} position={[0, y, 0]}>
+          <mesh key={`spine-${idx}`} position={[0, y, 0]} scale={[evolutionFactor, evolutionFactor, evolutionFactor]}>
             <torusGeometry args={[0.13 * scale, 0.016, 8, 24]} />
             <meshStandardMaterial
               color={inNeuralSection ? "#39ff14" : "#00f0ff"}
@@ -447,7 +447,9 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
           (inNutritionSection && (joint.name === 'chest' || joint.name === 'pelvis'));
 
         const nodeColor = isPulseActive ? '#39ff14' : '#00f0ff';
-        const nodeSize = joint.size * (isHoveredHighlight ? 1.4 : 1.0);
+        
+        // Increase node evolution scale dynamically on scroll
+        const jointScale = isHoveredHighlight ? 1.4 : (1.0 + (scrollProgress > 0.3 ? (scrollProgress - 0.3) * 0.4 : 0));
 
         // Shift shoulders laterally based on evolution
         let pos = joint.pos.clone();
@@ -459,9 +461,9 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
         }
 
         return (
-          <group key={joint.name} position={pos}>
+          <group key={joint.name} position={pos} scale={[jointScale, jointScale, jointScale]}>
             <mesh>
-              <sphereGeometry args={[nodeSize, 12, 12]} />
+              <sphereGeometry args={[joint.size, 12, 12]} />
               <meshStandardMaterial
                 color={nodeColor}
                 wireframe
@@ -473,7 +475,7 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
             </mesh>
             {/* Glowing core/emissive interior indicator */}
             <mesh>
-              <sphereGeometry args={[nodeSize * 0.4, 8, 8]} />
+              <sphereGeometry args={[joint.size * 0.4, 8, 8]} />
               <meshBasicMaterial
                 color={nodeColor}
                 transparent
@@ -525,9 +527,9 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
 
         return (
           <group key={i}>
-            {/* Strand A */}
-            <mesh position={leftMidpoint} quaternion={quaternion}>
-              <cylinderGeometry args={[muscleRadius, muscleRadius, length, 6]} />
+            {/* Strand A - scaled radially on X & Z axis */}
+            <mesh position={leftMidpoint} quaternion={quaternion} scale={[evolutionFactor, 1.0, evolutionFactor]}>
+              <cylinderGeometry args={[0.016, 0.016, length, 6]} />
               <meshStandardMaterial
                 color={fiberColor}
                 wireframe
@@ -537,9 +539,9 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
                 metalness={0.9}
               />
             </mesh>
-            {/* Strand B */}
-            <mesh position={rightMidpoint} quaternion={quaternion}>
-              <cylinderGeometry args={[muscleRadius * 0.8, muscleRadius * 0.8, length, 6]} />
+            {/* Strand B - scaled radially on X & Z axis */}
+            <mesh position={rightMidpoint} quaternion={quaternion} scale={[evolutionFactor, 1.0, evolutionFactor]}>
+              <cylinderGeometry args={[0.0128, 0.0128, length, 6]} />
               <meshStandardMaterial
                 color={fiberColor}
                 wireframe
