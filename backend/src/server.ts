@@ -14,7 +14,11 @@ import exportRoutes from './routes/export';
 dotenv.config();
 
 // Enforce Google & Cloudflare DNS for robust SRV resolutions
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (dnsErr) {
+  console.warn('⚠️ [FitForge Core] Failed to set custom DNS servers, using system default:', dnsErr);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;

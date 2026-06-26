@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import FitnessProfile from '../models/FitnessProfile';
 
 const router = Router();
@@ -6,6 +7,9 @@ const router = Router();
 // Submit/Update Fitness Profile
 router.post('/', async (req: Request, res: Response) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ error: 'Database connection is offline. Please verify MongoDB Atlas IP whitelisting (0.0.0.0/0) or credentials in Railway env.' });
+    }
     const {
       clerkId,
       age,
@@ -56,6 +60,9 @@ router.post('/', async (req: Request, res: Response) => {
 // Fetch Profile by Clerk ID
 router.get('/:clerkId', async (req: Request, res: Response) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ error: 'Database connection is offline. Please verify MongoDB Atlas IP whitelisting (0.0.0.0/0) or credentials in Railway env.' });
+    }
     const profile = await FitnessProfile.findOne({ clerkId: req.params.clerkId });
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
