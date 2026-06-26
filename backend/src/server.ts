@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import dns from 'dns';
 import blueprintRoutes from './routes/blueprint';
 import onboardingRoutes from './routes/onboarding';
 import workoutRoutes from './routes/workout';
@@ -11,6 +12,9 @@ import coachRoutes from './routes/coach';
 import exportRoutes from './routes/export';
 
 dotenv.config();
+
+// Enforce Google & Cloudflare DNS for robust SRV resolutions
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -56,6 +60,6 @@ if (mongoUri) {
 }
 
 // Start Server
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`🚀 [FitForge Core] Running on port ${PORT}`);
 });
