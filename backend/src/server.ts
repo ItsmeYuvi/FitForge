@@ -3,6 +3,12 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import blueprintRoutes from './routes/blueprint';
+import onboardingRoutes from './routes/onboarding';
+import workoutRoutes from './routes/workout';
+import nutritionRoutes from './routes/nutrition';
+import progressRoutes from './routes/progress';
+import coachRoutes from './routes/coach';
+import exportRoutes from './routes/export';
 
 dotenv.config();
 
@@ -19,6 +25,12 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/blueprint', blueprintRoutes);
+app.use('/api/onboarding', onboardingRoutes);
+app.use('/api/workout', workoutRoutes);
+app.use('/api/nutrition', nutritionRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/coach', coachRoutes);
+app.use('/api/export', exportRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {
