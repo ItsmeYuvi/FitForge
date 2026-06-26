@@ -207,7 +207,7 @@ export default function CTA() {
   };
 
   return (
-    <section id="blueprint-generator" className="relative w-full min-h-screen py-24 px-6 sm:px-12 md:px-24 flex flex-col justify-center items-center z-20 overflow-hidden">
+    <section id="blueprint-generator" className="relative w-full h-screen snap-start snap-always py-24 px-6 sm:px-12 md:px-24 flex items-center justify-center overflow-hidden z-20 shrink-0 select-none">
       
       {/* Background blur flares */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-neon-green opacity-5 blur-[200px] pointer-events-none" />

@@ -32,7 +32,7 @@ export default function Hero({ onGenerateClick }: HeroProps) {
   };
 
   return (
-    <section className="relative w-full min-h-screen flex flex-col justify-between pt-24 pb-12 px-6 sm:px-12 md:px-24 overflow-hidden z-20">
+    <section className="relative w-full h-screen snap-start snap-always flex flex-col justify-between pt-24 pb-12 px-6 sm:px-12 md:px-24 overflow-hidden z-20 select-none shrink-0">
       {/* Background Gradients */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyber-blue opacity-5 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-neon-green opacity-5 blur-[150px] pointer-events-none" />

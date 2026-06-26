@@ -80,7 +80,7 @@ export default function SocialProof() {
   ];
 
   return (
-    <section className="relative w-full min-h-screen py-24 px-6 sm:px-12 md:px-24 flex flex-col justify-center z-20">
+    <section className="relative w-full h-screen snap-start snap-always py-24 px-6 sm:px-12 md:px-24 flex items-center justify-center overflow-hidden z-20 shrink-0 select-none">
       <div className="max-w-7xl mx-auto w-full z-10">
         
         {/* Section Header */}

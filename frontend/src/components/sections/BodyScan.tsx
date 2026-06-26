@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Award, BarChart, Scale, Thermometer, User } from 'lucide-react';
+import { Activity, Award, BarChart, Scale, Thermometer, User, RefreshCw } from 'lucide-react';
 
 interface MetricItem {
   id: string;
@@ -15,14 +15,51 @@ interface MetricItem {
 
 interface BodyScanProps {
   onHoverMetric: (metric: string) => void;
+  profile?: any;
 }
 
-export default function BodyScan({ onHoverMetric }: BodyScanProps) {
+export default function BodyScan({ onHoverMetric, profile }: BodyScanProps) {
+  // Helper to calculate biometrics on the fly from database profile
+  const getMetricValue = (id: string) => {
+    if (!profile) return 'PENDING';
+
+    const hM = profile.height / 100;
+    const bmiVal = profile.weight / (hM * hM);
+    const isMale = profile.gender === 'male';
+    const bmrVal = isMale 
+      ? 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5
+      : 10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161;
+
+    switch (id) {
+      case 'height':
+        return profile.height.toString();
+      case 'weight':
+        return profile.weight.toString();
+      case 'bmi':
+        return bmiVal.toFixed(1);
+      case 'bodyFat': {
+        const estFat = isMale 
+          ? 1.20 * bmiVal + 0.23 * profile.age - 16.2 
+          : 1.20 * bmiVal + 0.23 * profile.age - 5.4;
+        return Math.max(3, estFat).toFixed(1);
+      }
+      case 'bmr':
+        return Math.round(bmrVal).toLocaleString();
+      case 'tdee': {
+        const multipliers: Record<string, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
+        const tdeeVal = bmrVal * (multipliers[profile.activityLevel] || 1.2);
+        return Math.round(tdeeVal).toLocaleString();
+      }
+      default:
+        return '---';
+    }
+  };
+
   const metrics: MetricItem[] = [
     {
       id: 'height',
       name: 'Height Index',
-      value: '180',
+      value: getMetricValue('height'),
       unit: 'cm',
       description: 'Vertical skeleton scale vector. Calculated against baseline average distribution.',
       icon: User,
@@ -30,7 +67,7 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
     {
       id: 'weight',
       name: 'Mass Index',
-      value: '78.5',
+      value: getMetricValue('weight'),
       unit: 'kg',
       description: 'Total gravity resistance weight. Subdivided into lean mass and lipid tissue categories.',
       icon: Scale,
@@ -38,7 +75,7 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
     {
       id: 'bmi',
       name: 'Body Mass Index',
-      value: '24.2',
+      value: getMetricValue('bmi'),
       unit: 'ratio',
       description: 'Proportional body mass ratio. Classified within the peak optimization standard quadrant.',
       icon: BarChart,
@@ -46,7 +83,7 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
     {
       id: 'bodyFat',
       name: 'Lipid Ratio',
-      value: '14.8',
+      value: getMetricValue('bodyFat'),
       unit: '%',
       description: 'Adipose tissue concentration estimate. Calculated using cybernetic neural density models.',
       icon: Award,
@@ -54,7 +91,7 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
     {
       id: 'bmr',
       name: 'Basal Metabolic Rate',
-      value: '1,840',
+      value: getMetricValue('bmr'),
       unit: 'kcal',
       description: 'Baseline organ thermal operation cost. Minimum daily survival wattage in idle state.',
       icon: Thermometer,
@@ -62,7 +99,7 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
     {
       id: 'tdee',
       name: 'Total Daily Energy Expenditure',
-      value: '2,852',
+      value: getMetricValue('tdee'),
       unit: 'kcal',
       description: 'Total daily energy usage. Measured including moderate movement coefficients.',
       icon: Activity,
@@ -70,7 +107,7 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
   ];
 
   return (
-    <section className="relative w-full min-h-screen py-24 px-6 sm:px-12 md:px-24 flex flex-col justify-center z-20">
+    <section className="relative w-full h-screen snap-start snap-always py-24 px-6 sm:px-12 md:px-24 flex items-center justify-center overflow-hidden z-20 shrink-0 select-none">
       <div className="absolute inset-0 bg-gradient-to-b from-dark-bg via-dark-surface to-dark-bg pointer-events-none" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto z-10 w-full">
@@ -82,8 +119,8 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
           <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight leading-none text-white">
             Deep-Tissue Neural Scan
           </h2>
-          <p className="text-sm sm:text-base text-gray-400 font-light leading-relaxed max-w-md">
-            As your data flow streams, the holographic matrix maps your physical structure. Move your cursor over any metric node to isolate and analyze specific skeletal nodes.
+          <p className="text-sm text-gray-400 font-light leading-relaxed max-w-md">
+            As your data flow streams, the holographic matrix maps your physical structure. Hover your cursor over any metric card to isolate specific skeletal joint regions.
           </p>
 
           <div className="w-full h-[1px] bg-gradient-to-r from-cyber-blue/40 via-transparent to-transparent my-4" />
@@ -91,12 +128,19 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
           {/* Interactive grid statistics */}
           <div className="grid grid-cols-2 gap-4">
             <div className="glass-panel p-4 rounded-lg border border-white/5">
-              <span className="text-[9px] font-mono text-gray-500 uppercase block mb-1">SCAN ACCURACY</span>
-              <span className="text-lg font-mono font-bold text-neon-green">99.8% VERIFIED</span>
+              <span className="text-[9px] font-mono text-gray-500 uppercase block mb-1">SCAN CALIBRATION</span>
+              {profile ? (
+                <span className="text-sm font-mono font-bold text-neon-green">ACTIVE SYNAPSE</span>
+              ) : (
+                <div className="flex items-center gap-1.5 font-mono text-xs text-gray-500 animate-pulse">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>AWAITING SIGNAL</span>
+                </div>
+              )}
             </div>
             <div className="glass-panel p-4 rounded-lg border border-white/5">
-              <span className="text-[9px] font-mono text-gray-500 uppercase block mb-1">CALIBRATION VELOCITY</span>
-              <span className="text-lg font-mono font-bold text-cyber-blue">0.14 SECONDS</span>
+              <span className="text-[9px] font-mono text-gray-500 uppercase block mb-1">CALIBRATION SPEED</span>
+              <span className="text-sm font-mono font-bold text-cyber-blue">0.14 SECONDS</span>
             </div>
           </div>
         </div>
@@ -105,14 +149,18 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
         <div className="flex flex-col gap-4">
           {metrics.map((metric) => {
             const Icon = metric.icon;
+            const isPending = metric.value === 'PENDING';
+
             return (
               <motion.div
                 key={metric.id}
                 onMouseEnter={() => onHoverMetric(metric.id)}
                 onMouseLeave={() => onHoverMetric('')}
-                whileHover={{ x: 10, borderColor: 'rgba(57, 255, 20, 0.4)' }}
-                data-cursor-text="ISOLATE"
-                className="interactive-card glass-panel p-5 rounded-xl border border-white/5 flex gap-4 items-center justify-between transition-all duration-300 pointer-events-auto"
+                whileHover={{ x: 8, borderColor: 'rgba(57, 255, 20, 0.4)' }}
+                data-cursor-text={isPending ? 'OFFLINE' : 'ISOLATE'}
+                className={`interactive-card glass-panel p-5 rounded-xl border flex gap-4 items-center justify-between transition-all duration-300 pointer-events-auto ${
+                  isPending ? 'border-white/5 opacity-55' : 'border-cyber-blue/15'
+                }`}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-lg bg-cyber-blue/10 flex items-center justify-center border border-cyber-blue/20">
@@ -125,8 +173,12 @@ export default function BodyScan({ onHoverMetric }: BodyScanProps) {
                 </div>
 
                 <div className="text-right">
-                  <span className="text-2xl font-mono font-bold text-neon-green">{metric.value}</span>
-                  <span className="text-[10px] font-mono text-gray-500 ml-1 uppercase">{metric.unit}</span>
+                  <span className={`text-2xl font-mono font-bold ${isPending ? 'text-gray-600 animate-pulse' : 'text-neon-green'}`}>
+                    {metric.value}
+                  </span>
+                  {!isPending && (
+                    <span className="text-[10px] font-mono text-gray-500 ml-1 uppercase">{metric.unit}</span>
+                  )}
                 </div>
               </motion.div>
             );

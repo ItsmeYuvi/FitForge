@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrainCircuit, Cpu, Zap, Flame } from 'lucide-react';
+import { BrainCircuit, Cpu, Zap, CircleAlert, EyeOff } from 'lucide-react';
 
 interface PredictionPhase {
   day: number;
@@ -15,63 +15,112 @@ interface PredictionPhase {
   highlights: string[];
 }
 
-export default function DigitalTwin() {
+interface DigitalTwinProps {
+  profile?: any;
+}
+
+export default function DigitalTwin({ profile }: DigitalTwinProps) {
   const [activePhase, setActivePhase] = useState<number>(0);
+  const [phases, setPhases] = useState<PredictionPhase[]>([]);
 
-  const phases: PredictionPhase[] = [
-    {
-      day: 0,
-      phaseName: 'GENESIS STATUS',
-      weight: '78.5 kg',
-      bodyFat: '14.8 %',
-      muscleMass: '63.2 kg',
-      metabolism: '1,840 kcal',
-      status: 'Establishing biological baseline and training capacity index.',
-      highlights: ['Caloric baseline locked', 'Resting metabolic stabilization', 'Neuromuscular activation prep'],
-    },
-    {
-      day: 30,
-      phaseName: 'PHASE ALPHA (ADAPTATION)',
-      weight: '76.8 kg',
-      bodyFat: '13.9 %',
-      muscleMass: '63.6 kg',
-      metabolism: '1,890 kcal',
-      status: 'Primary metabolic shift. Body adapts to structural load and nutritional ratios.',
-      highlights: ['Lipid oxidation triggered', 'Glycogen reserves optimized', 'Vo2 Max index +4.8%'],
-    },
-    {
-      day: 60,
-      phaseName: 'PHASE BETA (SYNTHESIS)',
-      weight: '75.2 kg',
-      bodyFat: '12.8 %',
-      muscleMass: '64.1 kg',
-      metabolism: '1,930 kcal',
-      status: 'Hypertrophic and lipid-clearing synthesis. Exponential power curves achieved.',
-      highlights: ['Myofibrillar hypertrophy', 'Visceral fat reduction', 'Systemic recovery coefficient peak'],
-    },
-    {
-      day: 90,
-      phaseName: 'PHASE OMEGA (TRANSCEND)',
-      weight: '73.8 kg',
-      bodyFat: '11.5 %',
-      muscleMass: '64.8 kg',
-      metabolism: '1,990 kcal',
-      status: 'Optimized digital twin target form unlocked. Fully reprogrammed performance index.',
-      highlights: ['New baseline homeostatic set-point', 'Lactate threshold +12%', 'Metabolic age shift: -4 years'],
-    },
-  ];
+  useEffect(() => {
+    if (profile) {
+      // Calculate realistic projections dynamically from their real biometrics!
+      const heightM = profile.height / 100;
+      const initialBmi = profile.weight / (heightM * heightM);
+      const isMale = profile.gender === 'male';
+      
+      const bmrVal = isMale 
+        ? Math.round(10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5)
+        : Math.round(10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161);
 
-  // SVG Chart points calculations
-  const weightPoints = "0,120 100,105 200,90 300,75";
-  const bodyFatPoints = "0,90 100,75 200,55 300,30";
-  const musclePoints = "0,30 100,45 200,65 300,85";
+      let initialFat = isMale 
+        ? (1.20 * initialBmi + 0.23 * profile.age - 16.2)
+        : (1.20 * initialBmi + 0.23 * profile.age - 5.4);
+      initialFat = Math.max(4, initialFat);
+
+      const computedPhases: PredictionPhase[] = [];
+      let currentWeight = profile.weight;
+      let currentFat = initialFat;
+
+      const milestones = [
+        { day: 0, title: 'GENESIS STATUS', status: 'Establishing biological baseline and training capacity index.' },
+        { day: 30, title: 'PHASE ALPHA (ADAPTATION)', status: 'Primary metabolic shift. Body adapts to structural load.' },
+        { day: 60, title: 'PHASE BETA (SYNTHESIS)', status: 'Hypertrophic and lipid-clearing synthesis. Performance curves peak.' },
+        { day: 90, title: 'PHASE OMEGA (TRANSCEND)', status: 'Optimized digital twin target unlocked. Reprogrammed physical form.' }
+      ];
+
+      milestones.forEach((m, idx) => {
+        if (idx > 0) {
+          if (profile.goal === 'lose_fat') {
+            currentWeight -= 1.8;
+            currentFat -= 1.0;
+          } else if (profile.goal === 'build_muscle') {
+            currentWeight += 1.0;
+            currentFat += 0.2;
+          } else {
+            currentWeight -= 0.5;
+            currentFat -= 0.6;
+          }
+        }
+
+        const currentMuscle = currentWeight * (1 - currentFat / 100);
+
+        computedPhases.push({
+          day: m.day,
+          phaseName: m.title,
+          weight: `${currentWeight.toFixed(1)} kg`,
+          bodyFat: `${Math.max(3, currentFat).toFixed(1)} %`,
+          muscleMass: `${currentMuscle.toFixed(1)} kg`,
+          metabolism: `${Math.round(bmrVal + (idx * 50))} kcal`,
+          status: m.status,
+          highlights: idx === 0 
+            ? ['Caloric baseline locked', 'Metabolic stabilization active', 'Neuromuscular calibration prep']
+            : idx === 1
+            ? ['Lipid oxidation triggered', 'Glycogen reserves optimized', 'VO2 Max index +4.8%']
+            : idx === 2
+            ? ['Myofibrillar hypertrophy active', 'Visceral fat reduction', 'Systemic recovery coefficient peak']
+            : ['New homeostatic set-point', 'Lactate threshold +12%', 'Metabolic age shift: -4 years']
+        });
+      });
+
+      setPhases(computedPhases);
+    }
+  }, [profile]);
+
+  // Coordinate paths mapping for the SVG graphs
+  // Maps calculations dynamically
+  let weightPoints = "0,120 100,105 200,90 300,75";
+  let bodyFatPoints = "0,90 100,75 200,55 300,30";
+
+  if (phases.length > 0) {
+    const minW = Math.min(...phases.map(p => parseFloat(p.weight)));
+    const maxW = Math.max(...phases.map(p => parseFloat(p.weight)));
+    const wRange = maxW - minW || 1;
+
+    const minF = Math.min(...phases.map(p => parseFloat(p.bodyFat)));
+    const maxF = Math.max(...phases.map(p => parseFloat(p.bodyFat)));
+    const fRange = maxF - minF || 1;
+
+    weightPoints = phases.map((p, idx) => {
+      const x = idx * 100;
+      const y = 110 - ((parseFloat(p.weight) - minW) / wRange) * 80;
+      return `${x},${y}`;
+    }).join(' ');
+
+    bodyFatPoints = phases.map((p, idx) => {
+      const x = idx * 100;
+      const y = 110 - ((parseFloat(p.bodyFat) - minF) / fRange) * 80;
+      return `${x},${y}`;
+    }).join(' ');
+  }
 
   return (
-    <section className="relative w-full min-h-screen py-24 px-6 sm:px-12 md:px-24 flex flex-col justify-center z-20">
+    <section className="relative w-full h-screen snap-start snap-always py-24 px-6 sm:px-12 md:px-24 flex items-center justify-center overflow-hidden z-20 shrink-0 select-none">
       <div className="max-w-7xl mx-auto w-full z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col gap-4 mb-16">
+        <div className="flex flex-col gap-4 mb-12">
           <span className="text-xs font-mono tracking-widest text-neon-green uppercase flex items-center gap-2">
             <BrainCircuit className="w-4 h-4 text-neon-green animate-pulse" />
             SECTION 03 // PREDICTIVE DIGITAL TWIN
@@ -84,180 +133,164 @@ export default function DigitalTwin() {
           </p>
         </div>
 
-        {/* Main Dashboard Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-          
-          {/* Column 1: Phase Selector Cards */}
-          <div className="flex flex-col gap-4">
-            {phases.map((phase, idx) => (
-              <button
-                key={phase.day}
-                onClick={() => setActivePhase(idx)}
-                data-cursor-text="PREDICT"
-                className={`interactive-card text-left p-5 rounded-xl border transition-all duration-300 pointer-events-auto flex items-center justify-between ${
-                  activePhase === idx
-                    ? 'glass-panel-glow-green border-neon-green/40 shadow-neon-green/10'
-                    : 'glass-panel border-white/5 opacity-60 hover:opacity-100 hover:border-white/10'
-                }`}
-              >
-                <div>
-                  <span className="text-[10px] font-mono text-neon-green tracking-widest block mb-1">
-                    {phase.day === 0 ? 'START' : `DAY ${phase.day}`}
-                  </span>
-                  <h3 className="text-sm font-semibold text-white tracking-wide">{phase.phaseName}</h3>
-                </div>
-                <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center font-mono text-[10px] text-gray-400">
-                  {phase.day === 0 ? '00' : `0${idx}`}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Column 2 & 3 Combined: Detailed Twin Analytics Panel */}
-          <div className="lg:col-span-2 glass-panel p-8 rounded-2xl border border-white/5 relative flex flex-col justify-between overflow-hidden">
-            {/* Background Cyber Grid */}
-            <div className="absolute inset-0 cyber-grid opacity-[0.03] pointer-events-none" />
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activePhase}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.4 }}
-                className="flex-1 flex flex-col justify-between gap-8 z-10"
-              >
-                {/* Header Metrics */}
-                <div className="flex justify-between items-start flex-wrap gap-4">
+        {profile && phases.length > 0 ? (
+          /* Live Calibrated Dashboard */
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            
+            {/* Column 1: Phase Selector Cards */}
+            <div className="flex flex-col gap-4">
+              {phases.map((phase, idx) => (
+                <button
+                  key={phase.day}
+                  onClick={() => setActivePhase(idx)}
+                  data-cursor-text="PREDICT"
+                  className={`interactive-card text-left p-4 rounded-xl border transition-all duration-300 pointer-events-auto flex items-center justify-between ${
+                    activePhase === idx
+                      ? 'glass-panel-glow-green border-neon-green/40 shadow-neon-green/10'
+                      : 'glass-panel border-white/5 opacity-60 hover:opacity-100 hover:border-white/10'
+                  }`}
+                >
                   <div>
-                    <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest block">
-                      SIMULATION METRICS RANGE
+                    <span className="text-[9px] font-mono text-neon-green tracking-widest block mb-1">
+                      {phase.day === 0 ? 'START' : `DAY ${phase.day}`}
                     </span>
-                    <h3 className="text-2xl font-bold tracking-tight text-white mt-1">
-                      {phases[activePhase].phaseName}
-                    </h3>
+                    <h3 className="text-xs font-semibold text-white tracking-wide">{phase.phaseName}</h3>
                   </div>
-                  <div className="flex gap-4">
-                    <div className="glass-panel px-4 py-2 rounded-lg border border-white/5 text-center min-w-[70px]">
-                      <span className="text-[8px] font-mono text-gray-500 uppercase block">FAT LEVEL</span>
-                      <span className="text-lg font-mono font-bold text-cyber-blue">{phases[activePhase].bodyFat}</span>
-                    </div>
-                    <div className="glass-panel px-4 py-2 rounded-lg border border-white/5 text-center min-w-[70px]">
-                      <span className="text-[8px] font-mono text-gray-500 uppercase block">MUSCLE</span>
-                      <span className="text-lg font-mono font-bold text-neon-green">{phases[activePhase].muscleMass}</span>
-                    </div>
+                  <div className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center font-mono text-[9px] text-gray-400">
+                    {phase.day === 0 ? '00' : `0${idx}`}
                   </div>
-                </div>
+                </button>
+              ))}
+            </div>
 
-                {/* Simulation Description */}
-                <div className="flex gap-4 items-start bg-white/5 p-4 rounded-xl border border-white/5">
-                  <Cpu className="w-5 h-5 text-neon-green mt-0.5 animate-pulse shrink-0" />
-                  <div>
-                    <span className="text-[10px] font-mono text-gray-400 block mb-1">METAMORPHOSIS STATUS</span>
-                    <p className="text-xs text-gray-300 leading-relaxed font-light">
-                      {phases[activePhase].status}
-                    </p>
-                  </div>
-                </div>
+            {/* Column 2 & 3 Combined: Detailed Twin Analytics Panel */}
+            <div className="lg:col-span-2 glass-panel p-6 sm:p-8 rounded-2xl border border-white/5 relative flex flex-col justify-between overflow-hidden">
+              <div className="absolute inset-0 cyber-grid opacity-[0.03] pointer-events-none" />
 
-                {/* Sub-grid of graphs and details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                  
-                  {/* Floating Chart panel */}
-                  <div className="glass-panel p-5 rounded-xl border border-white/5 relative">
-                    <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block mb-4">
-                      90-DAY METAMORPHOSIS SLOPES
-                    </span>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePhase}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex-1 flex flex-col justify-between gap-6 z-10"
+                >
+                  <div className="flex justify-between items-start flex-wrap gap-4">
+                    <div>
+                      <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block">
+                        SIMULATION METRICS RANGE
+                      </span>
+                      <h3 className="text-xl font-bold tracking-tight text-white mt-1">
+                        {phases[activePhase].phaseName}
+                      </h3>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 text-center min-w-[70px]">
+                        <span className="text-[7px] font-mono text-gray-500 uppercase block">FAT %</span>
+                        <span className="text-base font-mono font-bold text-cyber-blue">{phases[activePhase].bodyFat}</span>
+                      </div>
+                      <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 text-center min-w-[70px]">
+                        <span className="text-[7px] font-mono text-gray-500 uppercase block">MUSCLE</span>
+                        <span className="text-base font-mono font-bold text-neon-green">{phases[activePhase].muscleMass}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start bg-white/5 p-4 rounded-xl border border-white/5">
+                    <Cpu className="w-4 h-4 text-neon-green mt-0.5 animate-pulse shrink-0" />
+                    <div>
+                      <span className="text-[9px] font-mono text-gray-400 block mb-0.5">METAMORPHOSIS STATUS</span>
+                      <p className="text-[11px] text-gray-300 leading-normal font-light">
+                        {phases[activePhase].status}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     
                     {/* SVG Line Graph */}
-                    <div className="w-full h-32 relative">
-                      <svg className="w-full h-full" viewBox="0 0 300 150">
-                        {/* Grid lines */}
-                        <line x1="0" y1="37" x2="300" y2="37" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                        <line x1="0" y1="75" x2="300" y2="75" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                        <line x1="0" y1="112" x2="300" y2="112" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                        
-                        {/* Muscle Growth Line (Neon Green) */}
-                        <polyline
-                          fill="none"
-                          stroke="#39ff14"
-                          strokeWidth="2.5"
-                          points={musclePoints}
-                          className="opacity-80"
-                        />
-                        {/* Lipid Decline Line (Cyber Blue) */}
-                        <polyline
-                          fill="none"
-                          stroke="#00f0ff"
-                          strokeWidth="2.5"
-                          points={bodyFatPoints}
-                          className="opacity-80"
-                        />
+                    <div className="glass-panel p-4 rounded-xl border border-white/5 relative">
+                      <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest block mb-2">
+                        90-DAY METAMORPHOSIS SLOPES
+                      </span>
+                      
+                      <div className="w-full h-24 relative">
+                        <svg className="w-full h-full" viewBox="0 0 300 120">
+                          <line x1="0" y1="30" x2="300" y2="30" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                          <line x1="0" y1="60" x2="300" y2="60" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                          <line x1="0" y1="90" x2="300" y2="90" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
+                          
+                          <polyline fill="none" stroke="#39ff14" strokeWidth="2" points={weightPoints} className="opacity-80" />
+                          <polyline fill="none" stroke="#00f0ff" strokeWidth="2" points={bodyFatPoints} className="opacity-80" />
 
-                        {/* Interactive dots representing phase steps */}
-                        {[0, 100, 200, 300].map((cx, idx) => (
-                          <circle
-                            key={idx}
-                            cx={cx}
-                            cy={idx === 0 ? 30 : idx === 1 ? 45 : idx === 2 ? 65 : 85}
-                            r={activePhase === idx ? 5 : 3.5}
-                            fill={activePhase === idx ? '#39ff14' : '#1e3a1e'}
-                            stroke="#030303"
-                            strokeWidth="1.5"
-                          />
-                        ))}
-                      </svg>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-3 font-mono text-[8px] text-gray-500 uppercase">
-                      <span>DAY 0</span>
-                      <span>DAY 30</span>
-                      <span>DAY 60</span>
-                      <span>DAY 90</span>
-                    </div>
-
-                    {/* Chart Legends */}
-                    <div className="flex gap-4 mt-3">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-neon-green" />
-                        <span className="text-[8px] font-mono text-gray-400">LEAN MUSCLE GROWTH</span>
+                          {[0, 100, 200, 300].map((cx, idx) => (
+                            <circle
+                              key={idx}
+                              cx={cx}
+                              cy={idx === 0 ? 30 : idx === 1 ? 55 : idx === 2 ? 75 : 95}
+                              r={activePhase === idx ? 4.5 : 3}
+                              fill={activePhase === idx ? '#39ff14' : '#1e3a1e'}
+                              stroke="#030303"
+                              strokeWidth="1"
+                            />
+                          ))}
+                        </svg>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-cyber-blue" />
-                        <span className="text-[8px] font-mono text-gray-400">BODY FAT REDUCTION</span>
+
+                      <div className="flex justify-between items-center mt-2 font-mono text-[7px] text-gray-500 uppercase">
+                        <span>DAY 0</span>
+                        <span>DAY 30</span>
+                        <span>DAY 60</span>
+                        <span>DAY 90</span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Highlights Bullet List */}
-                  <div className="flex flex-col gap-4">
-                    <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest block">
-                      SYSTEM PREDICTION HIGHLIGHTS
-                    </span>
+                    {/* Bullet Highlights */}
                     <div className="flex flex-col gap-3">
-                      {phases[activePhase].highlights.map((highlight, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
-                          <span className="text-xs text-gray-300 font-light">{highlight}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-4 mt-4 font-mono">
-                      <div className="flex items-center gap-1">
-                        <Zap className="w-4 h-4 text-cyber-blue" />
-                        <span className="text-xs font-bold text-white">{phases[activePhase].metabolism}</span>
+                      <span className="text-[8px] font-mono text-gray-500 uppercase tracking-widest block">
+                        SYSTEM PREDICTION HIGHLIGHTS
+                      </span>
+                      <div className="flex flex-col gap-2">
+                        {phases[activePhase].highlights.map((highlight, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-[11px] text-gray-300 font-light">
+                            <div className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
+                            <span>{highlight}</span>
+                          </div>
+                        ))}
                       </div>
-                      <span className="text-[10px] text-gray-500 uppercase">DAILY IDLE ENERGY</span>
+
+                      <div className="flex items-center gap-4 mt-2 font-mono">
+                        <div className="flex items-center gap-1 text-[11px]">
+                          <Zap className="w-3.5 h-3.5 text-cyber-blue" />
+                          <span className="font-bold text-white">{phases[activePhase].metabolism}</span>
+                        </div>
+                        <span className="text-[9px] text-gray-500 uppercase">DAILY IDLE ENERGY</span>
+                      </div>
                     </div>
+
                   </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-                </div>
-              </motion.div>
-            </AnimatePresence>
           </div>
-
-        </div>
+        ) : (
+          /* Empty Calibration state */
+          <div className="w-full glass-panel p-12 rounded-2xl border border-dashed border-cyber-blue/30 flex flex-col items-center justify-center text-center gap-4 py-20 pointer-events-auto">
+            <div className="w-12 h-12 rounded-full bg-cyber-blue/5 border border-cyber-blue/20 flex items-center justify-center animate-pulse">
+              <EyeOff className="w-5 h-5 text-cyber-blue" />
+            </div>
+            <div>
+              <h3 className="text-sm font-mono font-bold text-white tracking-widest uppercase">
+                CALIBRATION SIMULATOR OFFLINE
+              </h3>
+              <p className="text-xs text-gray-400 font-light max-w-sm mt-2 mx-auto leading-relaxed">
+                No active biometric metrics detected. Transmit your parameters via the Metamorphosis generator below to initialize your digital physical twin.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
