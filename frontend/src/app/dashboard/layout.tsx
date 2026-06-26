@@ -15,10 +15,24 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Redirect to sign-in page if not logged in
+  // Redirect to sign-in page if not logged in, and check onboarding status
   useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/');
+    if (isLoaded) {
+      if (!user) {
+        router.push('/');
+      } else {
+        const checkOnboarding = async () => {
+          try {
+            const res = await fetch(`https://fitforge-production-0c79.up.railway.app/api/onboarding/${user.id}`);
+            if (res.status === 404) {
+              router.push('/onboarding');
+            }
+          } catch (err) {
+            console.error('Failed to verify onboarding status:', err);
+          }
+        };
+        checkOnboarding();
+      }
     }
   }, [isLoaded, user, router]);
 
