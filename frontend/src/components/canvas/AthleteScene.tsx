@@ -141,6 +141,7 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
   const orbitRing1Ref = useRef<THREE.Mesh>(null);
   const orbitRing2Ref = useRef<THREE.Mesh>(null);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [time, setTime] = useState(0);
 
   // Pre-allocated vectors to prevent GC allocations in useFrame
   const mannequinPos = useRef(new THREE.Vector3(0, 0, 0));
@@ -160,8 +161,21 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Update timer animation frame at 33 FPS when stationary at the bottom
+  useEffect(() => {
+    let interval: any;
+    if (scrollProgress > 0.85) {
+      interval = setInterval(() => {
+        setTime((t) => t + 0.03);
+      }, 30);
+    } else {
+      setTime(0);
+    }
+    return () => clearInterval(interval);
+  }, [scrollProgress]);
+
   // Joints model array
-  const joints = [
+  const joints = React.useMemo(() => [
     { name: 'head', pos: new THREE.Vector3(0, 1.4, 0), size: 0.14 },
     { name: 'neck', pos: new THREE.Vector3(0, 1.05, 0), size: 0.06 },
     { name: 'chest', pos: new THREE.Vector3(0, 0.7, 0), size: 0.11 },
@@ -180,10 +194,10 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
     { name: 'r-hip', pos: new THREE.Vector3(0.2, -0.25, 0), size: 0.08 },
     { name: 'r-knee', pos: new THREE.Vector3(0.22, -0.85, 0.05), size: 0.07 },
     { name: 'r-ankle', pos: new THREE.Vector3(0.24, -1.45, 0.1), size: 0.06 },
-  ];
+  ], []);
 
   // Bones mapping array
-  const bones = [
+  const bones = React.useMemo(() => [
     { start: 'head', end: 'neck' },
     { start: 'neck', end: 'chest' },
     { start: 'chest', end: 'pelvis' },
@@ -203,7 +217,7 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
     { start: 'pelvis', end: 'r-hip' },
     { start: 'r-hip', end: 'r-knee' },
     { start: 'r-knee', end: 'r-ankle' },
-  ];
+  ], []);
 
   // Scroll triggers segment mapping
   // Hero (0.0 -> 0.15)
@@ -220,6 +234,52 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
   const muscleRadius = 0.016 * evolutionFactor;
   const chestPlateScaleX = 1.0 + (scrollProgress > 0.3 ? (scrollProgress - 0.3) * 0.6 : 0);
   const shoulderWidthMultiplier = 1.0 + (scrollProgress > 0.3 ? (scrollProgress - 0.3) * 0.25 : 0);
+
+  // Dynamic biomechanical joint coordinates mapping logic
+  const getJointPos = (name: string, defaultPos: THREE.Vector3) => {
+    const pos = defaultPos.clone();
+    
+    // Shift shoulders laterally based on evolution
+    if (name.includes('shoulder')) {
+      pos.x *= shoulderWidthMultiplier;
+    } else if (name.includes('elbow') || name.includes('wrist')) {
+      // Adjust limbs outward if shoulders expanded
+      pos.x += (pos.x > 0 ? 1 : -1) * (shoulderWidthMultiplier - 1.0) * 0.45;
+    }
+
+    // Apply double bicep flex activity at bottom section
+    if (scrollProgress > 0.85 && time > 0) {
+      const curl = Math.sin(time * 2.5) * 0.5 + 0.5; // range 0 to 1
+      
+      const isLeft = name.startsWith('l-');
+      const shX = (isLeft ? -0.45 : 0.45) * shoulderWidthMultiplier;
+      const shPos = new THREE.Vector3(shX, 0.75, 0);
+
+      // Upper arm length (Shoulder to Elbow) and Forearm length (Elbow to Wrist)
+      const lenUpper = 0.561;
+      const lenForearm = 0.477;
+
+      if (name.includes('elbow')) {
+        // Flexed elbow direction relative to shoulder (raised horizontally, forward and out)
+        const dirEl = new THREE.Vector3(isLeft ? -0.85 : 0.85, 0.45, 0.25).normalize();
+        const flexedElPos = shPos.clone().add(dirEl.multiplyScalar(lenUpper));
+        pos.lerp(flexedElPos, curl);
+      }
+      
+      if (name.includes('wrist')) {
+        // Compute the flexed elbow position to chain the forearm from
+        const dirEl = new THREE.Vector3(isLeft ? -0.85 : 0.85, 0.45, 0.25).normalize();
+        const flexedElPos = shPos.clone().add(dirEl.multiplyScalar(lenUpper));
+        
+        // Flexed wrist direction relative to elbow (pointing up and in towards the head/shoulder)
+        const dirWr = new THREE.Vector3(isLeft ? 0.55 : -0.55, 0.75, 0.35).normalize();
+        const flexedWrPos = flexedElPos.clone().add(dirWr.multiplyScalar(lenForearm));
+        pos.lerp(flexedWrPos, curl);
+      }
+    }
+    
+    return pos;
+  };
 
   useFrame((state) => {
     const isMobile = window.innerWidth < 768;
@@ -357,6 +417,9 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
   const inDashboardSection = scrollProgress >= 0.73 && scrollProgress <= 0.92;
   const inTransformationSection = scrollProgress >= 0.88;
 
+  // Dynamic visual activation: pulse green/white on heavy flex contraction at bottom CTA
+  const curlVal = scrollProgress > 0.85 && time > 0 ? Math.sin(time * 2.5) * 0.5 + 0.5 : 0;
+
   return (
     <group ref={groupRef}>
       {/* 1. Spine vertebrae discs */}
@@ -446,19 +509,17 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
           (inWorkoutSection && (joint.name.includes('shoulder') || joint.name.includes('elbow'))) ||
           (inNutritionSection && (joint.name === 'chest' || joint.name === 'pelvis'));
 
-        const nodeColor = isPulseActive ? '#39ff14' : '#00f0ff';
+        let nodeColor = isPulseActive ? '#39ff14' : '#00f0ff';
+        if (scrollProgress > 0.85) {
+          if (joint.name.includes('shoulder') || joint.name.includes('elbow') || joint.name.includes('wrist') || joint.name === 'chest') {
+            nodeColor = curlVal > 0.75 ? '#ffffff' : (curlVal > 0.3 ? '#39ff14' : '#00f0ff');
+          }
+        }
         
         // Increase node evolution scale dynamically on scroll
         const jointScale = isHoveredHighlight ? 1.4 : (1.0 + (scrollProgress > 0.3 ? (scrollProgress - 0.3) * 0.4 : 0));
 
-        // Shift shoulders laterally based on evolution
-        let pos = joint.pos.clone();
-        if (joint.name.includes('shoulder')) {
-          pos.x *= shoulderWidthMultiplier;
-        } else if (joint.name.includes('elbow') || joint.name.includes('wrist')) {
-          // Adjust limbs outward if shoulders expanded
-          pos.x += (pos.x > 0 ? 1 : -1) * (shoulderWidthMultiplier - 1.0) * 0.45;
-        }
+        const pos = getJointPos(joint.name, joint.pos);
 
         return (
           <group key={joint.name} position={pos} scale={[jointScale, jointScale, jointScale]}>
@@ -492,22 +553,8 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
         const startJoint = joints.find((j) => j.name === bone.start)!;
         const endJoint = joints.find((j) => j.name === bone.end)!;
 
-        // Shoulder widening coordinates calculation
-        let startPos = startJoint.pos.clone();
-        let endPos = endJoint.pos.clone();
-
-        if (bone.start.includes('shoulder')) {
-          startPos.x *= shoulderWidthMultiplier;
-        }
-        if (bone.end.includes('shoulder')) {
-          endPos.x *= shoulderWidthMultiplier;
-        }
-        if (bone.start.includes('elbow') || bone.start.includes('wrist')) {
-          startPos.x += (startPos.x > 0 ? 1 : -1) * (shoulderWidthMultiplier - 1.0) * 0.45;
-        }
-        if (bone.end.includes('elbow') || bone.end.includes('wrist')) {
-          endPos.x += (endPos.x > 0 ? 1 : -1) * (shoulderWidthMultiplier - 1.0) * 0.45;
-        }
+        const startPos = getJointPos(bone.start, startJoint.pos);
+        const endPos = getJointPos(bone.end, endJoint.pos);
 
         const direction = new THREE.Vector3().subVectors(endPos, startPos);
         const length = direction.length();
@@ -523,7 +570,11 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
         const rightMidpoint = midpoint.clone().sub(perpDirection);
 
         const isArmOrChestBone = bone.start === 'chest' || bone.start.includes('shoulder') || bone.start.includes('elbow');
-        const fiberColor = (inWorkoutSection && isArmOrChestBone) ? '#39ff14' : '#00f0ff';
+        let fiberColor = (inWorkoutSection && isArmOrChestBone) ? '#39ff14' : '#00f0ff';
+        if (scrollProgress > 0.85) {
+          // Muscle fibers shift color during contraction flex
+          fiberColor = curlVal > 0.75 ? '#ffffff' : (curlVal > 0.3 ? '#39ff14' : '#00f0ff');
+        }
 
         return (
           <group key={i}>
@@ -635,7 +686,7 @@ function HolographicHumanoid({ scrollProgress, activeMetric }: HumanoidProps) {
           metalness={0.9}
           transmission={0.2}
           emissive={inTransformationSection ? '#ffffff' : '#39ff14'}
-          emissiveIntensity={inTransformationSection ? 1.8 : 0.8}
+          emissiveIntensity={inTransformationSection ? 1.8 + curlVal * 1.4 : 0.8}
         />
       </mesh>
     </group>
