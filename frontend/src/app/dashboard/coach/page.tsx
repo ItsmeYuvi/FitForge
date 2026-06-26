@@ -10,6 +10,97 @@ interface ChatMessage {
   timestamp: string;
 }
 
+function parseInlineMarkdown(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={idx} className="font-semibold text-white bg-white/5 px-1.5 py-0.5 rounded border border-white/5 mx-0.5">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    const italicParts = part.split(/(\*.*?\*)/g);
+    if (italicParts.length > 1) {
+      return (
+        <span key={idx}>
+          {italicParts.map((ip, iidx) => {
+            if (ip.startsWith('*') && ip.endsWith('*')) {
+              return <em key={iidx} className="text-gray-400 italic">{ip.slice(1, -1)}</em>;
+            }
+            return ip;
+          })}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
+function renderMarkdown(text: string) {
+  const lines = text.split('\n');
+  return lines.map((line, lineIdx) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('### ')) {
+      const headerText = trimmed.replace(/^### /, '').trim().replace(/^\*\*|\*\*$/g, '');
+      return (
+        <h3 key={lineIdx} className="text-xs font-bold text-neon-green tracking-wide mt-4 mb-2 uppercase font-mono">
+          {parseInlineMarkdown(headerText)}
+        </h3>
+      );
+    }
+    if (trimmed.startsWith('## ')) {
+      const headerText = trimmed.replace(/^## /, '').trim().replace(/^\*\*|\*\*$/g, '');
+      return (
+        <h2 key={lineIdx} className="text-sm font-bold text-cyber-blue mt-5 mb-3 uppercase font-mono">
+          {parseInlineMarkdown(headerText)}
+        </h2>
+      );
+    }
+    if (trimmed.startsWith('# ')) {
+      const headerText = trimmed.replace(/^# /, '').trim().replace(/^\*\*|\*\*$/g, '');
+      return (
+        <h1 key={lineIdx} className="text-base font-black text-white mt-6 mb-3 uppercase font-display">
+          {parseInlineMarkdown(headerText)}
+        </h1>
+      );
+    }
+
+    if (trimmed.startsWith('- ')) {
+      const bulletText = trimmed.replace(/^-\s+/, '');
+      const isNested = line.indexOf('-') > 2;
+      return (
+        <div key={lineIdx} className={`flex gap-2 items-start my-1 ${isNested ? 'ml-8' : 'ml-4'}`}>
+          <span className="text-neon-green mt-1 text-[8px]">•</span>
+          <span className="flex-1 text-gray-300">{parseInlineMarkdown(bulletText)}</span>
+        </div>
+      );
+    }
+
+    const numListMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+    if (numListMatch) {
+      const num = numListMatch[1];
+      const listText = numListMatch[2];
+      return (
+        <div key={lineIdx} className="flex gap-2 items-start ml-2 my-1.5">
+          <span className="font-mono text-cyber-blue text-[10px] font-bold">{num}.</span>
+          <span className="flex-1 text-gray-300">{parseInlineMarkdown(listText)}</span>
+        </div>
+      );
+    }
+
+    if (trimmed === '') {
+      return <div key={lineIdx} className="h-2" />;
+    }
+
+    return (
+      <p key={lineIdx} className="my-1 leading-relaxed text-gray-300">
+        {parseInlineMarkdown(line)}
+      </p>
+    );
+  });
+}
+
 export default function CoachDashboard() {
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
@@ -154,9 +245,9 @@ export default function CoachDashboard() {
                       ? 'bg-cyber-blue/10 border-cyber-blue/30 rounded-tr-none' 
                       : 'glass-panel border-white/5 rounded-tl-none'
                   }`}
-                  style={{ whiteSpace: 'pre-wrap' }}
+                  style={isUser ? { whiteSpace: 'pre-wrap' } : undefined}
                 >
-                  {msg.content}
+                  {isUser ? msg.content : renderMarkdown(msg.content)}
                 </div>
               </div>
             );
