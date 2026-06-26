@@ -21,7 +21,7 @@ try {
 }
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000; // Hardcode to 5000 to match Railway public networking configuration
 
 // Middleware
 app.use(cors({
