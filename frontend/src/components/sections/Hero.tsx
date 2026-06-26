@@ -106,13 +106,13 @@ export default function Hero({ onGenerateClick }: HeroProps) {
               Get Started
             </Link>
 
-            <button
-              onClick={onGenerateClick}
-              data-cursor-text="EVOLVE"
+            <Link
+              href="/sign-in"
+              data-cursor-text="LOGIN"
               className="px-8 py-4 border border-white/10 glass-panel hover:bg-white/5 hover:border-white/20 text-white font-semibold text-xs tracking-widest uppercase rounded-lg transition-all duration-300 pointer-events-auto"
             >
-              Free Scanner Preview
-            </button>
+              Login
+            </Link>
           </motion.div>
         </motion.div>
       </div>

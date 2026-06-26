@@ -60,13 +60,13 @@ export default function WorkoutGen({ workout }: WorkoutGenProps) {
         {/* Section Title */}
         <div className="flex flex-col gap-4 text-center items-center mb-16">
           <span className="text-xs font-mono tracking-widest text-cyber-blue uppercase">
-            SECTION 04 // PIPELINE ARCHITECTURE
+            SECTION 04 // ADAPTIVE INTELLIGENCE
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-white leading-none">
-            Biometric Compilation Pipeline
+            A Plan That Evolves With You
           </h2>
           <p className="text-sm text-gray-400 font-light max-w-lg">
-            See how raw biometric inputs undergo neural synapse processing before compiling into a physical overload blueprint.
+            FitForge continuously learns from your workouts, recovery, progress, and performance. As your body changes, your training adapts automatically.
           </p>
         </div>
 

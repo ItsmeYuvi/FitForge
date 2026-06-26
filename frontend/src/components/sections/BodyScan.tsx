@@ -114,13 +114,13 @@ export default function BodyScan({ onHoverMetric, profile }: BodyScanProps) {
         {/* Left Grid: Explanations */}
         <div className="flex flex-col gap-6">
           <span className="text-xs font-mono tracking-widest text-cyber-blue uppercase">
-            SECTION 02 // BIOMETRIC BIO-SCAN
+            SECTION 02 // FITNESS DNA ANALYSIS
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight leading-none text-white">
-            Deep-Tissue Neural Scan
+            Your Fitness Blueprint
           </h2>
           <p className="text-sm text-gray-400 font-light leading-relaxed max-w-md">
-            As your data flow streams, the holographic matrix maps your physical structure. Hover your cursor over any metric card to isolate specific skeletal joint regions.
+            Every transformation begins with understanding your body. FitForge analyzes your height, weight, activity level, fitness goals, training experience, and recovery patterns to build a complete fitness profile.
           </p>
 
           <div className="w-full h-[1px] bg-gradient-to-r from-cyber-blue/40 via-transparent to-transparent my-4" />

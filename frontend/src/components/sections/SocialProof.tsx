@@ -87,13 +87,13 @@ export default function SocialProof() {
         <div className="flex flex-col gap-4 mb-16 text-center items-center">
           <span className="text-xs font-mono tracking-widest text-neon-green uppercase flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-neon-green" />
-            SECTION 07 // EXPERIMENTAL VERIFICATION
+            SECTION 07 // TRANSFORMATION ENGINE
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-white leading-none">
-            Empirical Results Logs
+            Track Your Evolution
           </h2>
           <p className="text-sm text-gray-400 font-light max-w-lg">
-            Human biometrics verified after 90-day neural optimization cycles. Real subjects. Real physiological transformations simulated and achieved.
+            Log your progress, compare milestones, and watch your transformation unfold through intelligent progress tracking and predictive analytics.
           </p>
         </div>
 

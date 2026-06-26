@@ -150,13 +150,13 @@ export default function NutritionEngine({ nutrition }: NutritionEngineProps) {
         {/* Header */}
         <div className="flex flex-col gap-4 mb-16 text-center items-center">
           <span className="text-xs font-mono tracking-widest text-neon-green uppercase">
-            SECTION 05 // NUTRITION COMBUSTION ENGINE
+            SECTION 05 // AI NUTRITION ENGINE
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-white leading-none">
-            Macro-Nutrient Fuel Ratios
+            Fuel Your Transformation
           </h2>
           <p className="text-sm text-gray-400 font-light max-w-lg">
-            Hover over the floating macro units to inspect their structural utility. Every gram is calculated to nourish muscular hypertrophy and speed up systemic cellular recovery.
+            Receive calorie targets, protein goals, and personalized meal plans generated specifically for your body and objective. Every recommendation is designed to maximize performance and recovery.
           </p>
         </div>
 

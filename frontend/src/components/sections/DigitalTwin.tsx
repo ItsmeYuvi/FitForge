@@ -121,15 +121,15 @@ export default function DigitalTwin({ profile }: DigitalTwinProps) {
         
         {/* Section Header */}
         <div className="flex flex-col gap-4 mb-12">
-          <span className="text-xs font-mono tracking-widest text-neon-green uppercase flex items-center gap-2">
-            <BrainCircuit className="w-4 h-4 text-neon-green animate-pulse" />
-            SECTION 03 // PREDICTIVE DIGITAL TWIN
+          <span className="text-xs font-mono tracking-widest text-cyber-blue uppercase flex items-center gap-2">
+            <BrainCircuit className="w-4 h-4 text-cyber-blue" />
+            SECTION 03 // AI WORKOUT GENERATION
           </span>
           <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-white leading-none">
-            The Digital Twin Simulation
+            Your Personalized Training System
           </h2>
           <p className="text-sm text-gray-400 font-light max-w-xl">
-            Simulate your physical evolution through our bio-predictive model. By synthesizing structural loads, hormone curves, and metabolic indices, FitForge builds your future physical form in the digital sandbox.
+            Our AI instantly generates a complete workout strategy tailored to your goals. Whether you're building muscle, losing fat, or transforming your physique, every exercise, set, rep, and progression strategy is customized for you.
           </p>
         </div>
 

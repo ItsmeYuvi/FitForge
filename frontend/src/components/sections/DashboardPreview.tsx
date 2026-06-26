@@ -51,13 +51,13 @@ export default function DashboardPreview({ weeklyReview, measurements }: Dashboa
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12">
           <div className="flex flex-col gap-4">
             <span className="text-xs font-mono tracking-widest text-cyber-blue uppercase">
-              SECTION 06 // SYSTEM TERMINAL PREVIEW
+              SECTION 06 // PERFORMANCE DASHBOARD
             </span>
             <h2 className="text-3xl sm:text-5xl font-display font-black tracking-tight text-white leading-none">
-              The Metamorphosis Terminal
+              Your Command Center
             </h2>
             <p className="text-sm text-gray-400 font-light max-w-lg">
-              Analyze metrics, log lifts, monitor sleep coefficients, and watch your physical twin model adapt in real-time as you complete daily tasks.
+              Track workouts, monitor body metrics, maintain streaks, analyze progress, and receive weekly AI insights from one powerful dashboard.
             </p>
           </div>
           
